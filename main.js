@@ -2,6 +2,8 @@
 var audioCtx;
 var oscType = 'sine';
 var globalGain;
+const maxOverallGain = 0.8;
+var activeOscillators = {}
 const playButton = document.querySelector('#playButton')
 const sineButton = document.querySelector('#sineButton')
 const sawtoothButton = document.querySelector('#sawtoothButton')
@@ -11,11 +13,6 @@ var attackTime = 0.1;
 var decayTime = 0.3;
 var sustainTime = 0.5;
 var releaseTime = 0.4;
-
-// Initializing audio context and oscillator waveform
-playButton.addEventListener("click", initializeAudioContext); 
-sineButton.addEventListener("click", () => setOscillatorWaveform('sine'));
-sawtoothButton.addEventListener("click", () => setOscillatorWaveform('sawtooth'));
 
 const keyboardFrequencyMap = {
     '90': 261.625565300598634,  //Z - C
@@ -47,7 +44,10 @@ const keyboardFrequencyMap = {
 window.addEventListener('keydown', keyDown, false);
 window.addEventListener('keyup', keyUp, false);
 
-var activeOscillators = {}
+// Initializing audio context and oscillator waveform
+playButton.addEventListener("click", initializeAudioContext); 
+sineButton.addEventListener("click", () => setOscillatorWaveform('sine'));
+sawtoothButton.addEventListener("click", () => setOscillatorWaveform('sawtooth'));
 
 function initializeAudioContext() {
     if (!audioCtx) {
@@ -72,8 +72,11 @@ function keyDown(event) {
 function keyUp(event) {
     const key = (event.detail || event.which).toString();
     if (keyboardFrequencyMap[key] && activeOscillators[key]) {
-        activeOscillators[key].stop();
+        const { osc, gainNode } = activeOscillators[key];
+        gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, releaseTime);
+        osc.stop();
         delete activeOscillators[key];
+        updateGlobalGain();
     }
 }
 
@@ -89,5 +92,17 @@ function playNote(key) {
 
     osc.connect(gainNode).connect(globalGain)
     osc.start();
-    activeOscillators[key] = osc;
+    activeOscillators[key] = { osc, gainNode };
+
+    updateGlobalGain()   
+}
+
+function updateGlobalGain() {
+    var gainSum = 0;
+    for (const key in activeOscillators) {
+        gainSum += activeOscillators[key].gainNode.gain.value;
+    }
+    const newGlobalGain = maxOverallGain / Math.max(1, gainSum);
+    globalGain.gain.setValueAtTime(newGlobalGain, audioCtx.currentTime);
+    console.log(gainSum, newGlobalGain);
 }
