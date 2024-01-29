@@ -4,15 +4,15 @@ var oscType = 'sine';
 var globalGain;
 const maxOverallGain = 0.8;
 var activeOscillators = {}
-const playButton = document.querySelector('#playButton')
+const startButton = document.querySelector('#startButton')
 const sineButton = document.querySelector('#sineButton')
 const sawtoothButton = document.querySelector('#sawtoothButton')
 
 // Hard-coding ADSR envelope 
-var attackTime = 0.1;
+var attackTime = 0.2;
 var decayTime = 0.3;
-var sustainTime = 0.5;
-var releaseTime = 0.4;
+var sustainTime = 0.3;
+var releaseTime = 0.05;
 
 const keyboardFrequencyMap = {
     '90': 261.625565300598634,  //Z - C
@@ -45,7 +45,7 @@ window.addEventListener('keydown', keyDown, false);
 window.addEventListener('keyup', keyUp, false);
 
 // Initializing audio context and oscillator waveform
-playButton.addEventListener("click", initializeAudioContext); 
+startButton.addEventListener("click", initializeAudioContext); 
 sineButton.addEventListener("click", () => setOscillatorWaveform('sine'));
 sawtoothButton.addEventListener("click", () => setOscillatorWaveform('sawtooth'));
 
@@ -73,10 +73,10 @@ function keyUp(event) {
     const key = (event.detail || event.which).toString();
     if (keyboardFrequencyMap[key] && activeOscillators[key]) {
         const { osc, gainNode } = activeOscillators[key];
+        gainNode.gain.cancelScheduledValues(audioCtx.currentTime);
         gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, releaseTime);
-        osc.stop();
         delete activeOscillators[key];
-        updateGlobalGain();
+        // updateGlobalGain();
     }
 }
 
@@ -86,10 +86,8 @@ function playNote(key) {
     osc.type = oscType; //choose your favorite waveform
 
     const gainNode = audioCtx.createGain();
-    gainNode.gain.exponentialRampToValueAtTime(0.4, audioCtx.currentTime + attackTime);
-    gainNode.gain.setTargetAtTime(0.2, audioCtx.currentTime + attackTime, decayTime);
-    gainNode.gain.setTargetAtTime(0, audioCtx.currentTime + attackTime + decayTime + sustainTime, releaseTime);
-
+    gainNode.gain.exponentialRampToValueAtTime(0.4, audioCtx.currentTime + attackTime); // Attack
+    gainNode.gain.setTargetAtTime(0.2, audioCtx.currentTime + attackTime, decayTime); // Decay
     osc.connect(gainNode).connect(globalGain)
     osc.start();
     activeOscillators[key] = { osc, gainNode };
@@ -104,5 +102,4 @@ function updateGlobalGain() {
     }
     const newGlobalGain = maxOverallGain / Math.max(1, gainSum);
     globalGain.gain.setValueAtTime(newGlobalGain, audioCtx.currentTime);
-    console.log(gainSum, newGlobalGain);
 }

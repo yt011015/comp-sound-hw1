@@ -4,13 +4,38 @@
 <head>
     <meta charset="utf-8">
     <title> Hello web audio! </title>
+    <style>
+        body {
+            background-color: rgb(124, 189, 137);
+        }
+        #startButton {
+            background-color: rgb(245, 111, 133);
+            width: 100px;
+            height: 80px;
+            margin: 30px;
+            border-radius: 10px;
+            color: rgb(222, 220, 220);
+            font-weight: bold;
+            border-width: 2px;
+            
+        }
+        #sineButton, #sawtoothButton {
+            background-color: rgb(27, 83, 64);
+            margin: 30px;
+            border-radius: 10px;
+            color: rgb(222, 220, 220);
+            font-weight: bold;
+            border-width: 2px;
+        }
+    </style>
 </head>
 
 <body>
-    <button id="playButton"> Play </button>
+    <button id="startButton"> Start </button>
     <button id="sineButton"> Sine Waveform </button>
     <button id="sawtoothButton"> Sawtooth Waveform </button>
 </body>
+   
 
 <script src="main.js"> </script>
 
