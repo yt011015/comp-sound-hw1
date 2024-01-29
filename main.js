@@ -1,3 +1,4 @@
+// Setting global variables
 var audioCtx;
 var oscType = 'sine';
 var globalGain;
@@ -5,24 +6,16 @@ const playButton = document.querySelector('#playButton')
 const sineButton = document.querySelector('#sineButton')
 const sawtoothButton = document.querySelector('#sawtoothButton')
 
+// Hard-coding ADSR envelope 
+var attackTime = 0.1;
+var decayTime = 0.3;
+var sustainTime = 0.5;
+var releaseTime = 0.4;
 
-playButton.addEventListener("click", function(event) {
-    if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    globalGain = audioCtx.createGain(); //this will control the volume of all notes
-    globalGain.gain.setValueAtTime(0.8, audioCtx.currentTime)
-    globalGain.connect(audioCtx.destination);
-})
-
-sineButton.addEventListener("click", function(event) {
-    oscType = 'sine';
-})
-
-sawtoothButton.addEventListener("click", function(event) {
-    oscType = 'sawtooth';
-})
-
+// Initializing audio context and oscillator waveform
+playButton.addEventListener("click", initializeAudioContext); 
+sineButton.addEventListener("click", () => setOscillatorWaveform('sine'));
+sawtoothButton.addEventListener("click", () => setOscillatorWaveform('sawtooth'));
 
 const keyboardFrequencyMap = {
     '90': 261.625565300598634,  //Z - C
@@ -54,7 +47,20 @@ const keyboardFrequencyMap = {
 window.addEventListener('keydown', keyDown, false);
 window.addEventListener('keyup', keyUp, false);
 
-activeOscillators = {}
+var activeOscillators = {}
+
+function initializeAudioContext() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    globalGain = audioCtx.createGain(); //this will control the volume of all notes
+    globalGain.gain.setValueAtTime(0.8, audioCtx.currentTime)
+    globalGain.connect(audioCtx.destination);
+}
+
+function setOscillatorWaveform(waveform) {
+    oscType = waveform;
+}
 
 function keyDown(event) {
     const key = (event.detail || event.which).toString();
@@ -75,10 +81,13 @@ function playNote(key) {
     const osc = audioCtx.createOscillator();
     osc.frequency.setValueAtTime(keyboardFrequencyMap[key], audioCtx.currentTime)
     osc.type = oscType; //choose your favorite waveform
-    // osc.connect(audioCtx.destination)
+
     const gainNode = audioCtx.createGain();
-    // gainNode.connect(audioCtx.destination);
+    gainNode.gain.exponentialRampToValueAtTime(0.4, audioCtx.currentTime + attackTime);
+    gainNode.gain.setTargetAtTime(0.2, audioCtx.currentTime + attackTime, decayTime);
+    gainNode.gain.setTargetAtTime(0, audioCtx.currentTime + attackTime + decayTime + sustainTime, releaseTime);
+
     osc.connect(gainNode).connect(globalGain)
     osc.start();
-    activeOscillators[key] = osc
+    activeOscillators[key] = osc;
 }
