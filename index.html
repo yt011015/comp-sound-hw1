@@ -3,37 +3,100 @@
 
 <head>
     <meta charset="utf-8">
-    <title> Hello web audio! </title>
+    <title> WebAudio Keyboard </title>
     <style>
         body {
-            background-color: rgb(124, 189, 137);
+            background-color: gray;
+        }
+        .buttons {
+            display: block;
         }
         #startButton {
+            display: inline-block;
+            font-size: 30px;
+            vertical-align: middle;
             background-color: rgb(245, 111, 133);
-            width: 100px;
-            height: 80px;
-            margin: 30px;
-            border-radius: 10px;
+            width: 200px;
+            height: 200px;
+            margin-left: 450px;
+            border-radius: 50%;
             color: rgb(222, 220, 220);
             font-weight: bold;
-            border-width: 2px;
-            
+            border-width: 10px;
         }
         #sineButton, #sawtoothButton {
             background-color: rgb(27, 83, 64);
-            margin: 30px;
+            margin-top: 50px;
+            margin-left: 50px;
             border-radius: 10px;
             color: rgb(222, 220, 220);
             font-weight: bold;
+            font-size: 30px;
             border-width: 2px;
+            height: 50px;
+        }
+        #waveformCanvas {
+            background-color: white;
+            margin-left: 50px;
+            margin-top: 50px;
+            border-radius: 50px;
+            border-color: black;
+            border-style: solid;
+            border-width: 80px;
+        }
+        .game-boy {
+            display: block;
+            margin-top: 20px;
+            margin-left: 52px;
+            font-size: 50px;
+            font-weight: bolder;
+            color: rgb(248, 246, 246);
+        }
+        .cross {
+            display: inline-block;
+            vertical-align: middle;
+            width: 200px;
+            height: 200px;
+            position: relative;
+            margin-left: 52px;
+            margin-top: 120px;
+        }
+
+        .cross::before, .cross::after {
+            content: "";
+            position: absolute;
+            width: 180px;
+            height: 60px;
+            background-color: black;
+        }
+
+        .cross::before {
+            transform: rotate(90deg);
+        }
+
+        .cross::after {
+            transform: rotate(0deg);
+        }
+        .waveforms {
+            margin-left: 250px;
         }
     </style>
 </head>
 
 <body>
-    <button id="startButton"> Start </button>
-    <button id="sineButton"> Sine Waveform </button>
-    <button id="sawtoothButton"> Sawtooth Waveform </button>
+    <canvas id="waveformCanvas" width="700" height="400"></canvas>
+    <div class="game-boy"> Nintendo Game Boy </div>
+
+    <div class="buttons">
+        <div class="cross"></div>
+        <button id="startButton"> Start/Reset</button>
+    </div>
+    
+    <div class="waveforms">
+        <button id="sineButton"> Sine </button>
+        <button id="sawtoothButton"> Sawtooth </button>
+    </div>
+    
 </body>
    
 
